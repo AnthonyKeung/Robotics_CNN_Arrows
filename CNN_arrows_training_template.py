@@ -12,17 +12,15 @@ You need to create your CNN model, train it, test it and save the model.
 import scipy.io as sio
 import numpy as np
 import tensorflow as tf
-import os
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.models import load_model
-from tensorflow.python.keras.layers import Dense, Dropout, Flatten
-from tensorflow.python.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
 from tensorflow.keras.optimizers import SGD
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.cm as cm
 import numpy.ma as ma
-
 
 from PIL import Image                                                            
 import glob
@@ -46,7 +44,7 @@ imageTestingPath = []
 
 # full path to training and testing images
 for i in range(len(namesList)):
-    trainingLoad = os.path.join(imageFolderTestingPath, namesList[i])
+    trainingLoad = os.path.join(imageFolderTrainingPath, namesList[i])
     testingLoad = os.path.join(imageFolderTestingPath, namesList[i])
     print(f"The training path is {trainingLoad} and the testingLoad is {testingLoad}")
     for trainImage in os.listdir(trainingLoad):
@@ -59,10 +57,11 @@ print(f"There are {len(imageTrainingPath)} training images")
 print(f"There are {len(imageTestingPath)} testing images")
 
 # resize images to speed up training process
-updateImageSize = [128, 128]
+updateImageSize = (128, 128)
 tempImg = Image.open(imageTrainingPath[0]).convert('L')
-tempImg.thumbnail(updateImageSize, Image.LANCZOS)
+tempImg = tempImg.resize(updateImageSize, Image.LANCZOS)
 [imWidth, imHeight] = tempImg.size
+print(imWidth, imHeight)
 
 # create space to load training images
 x_train = np.zeros((len(imageTrainingPath), imHeight, imWidth, 1))
@@ -73,13 +72,13 @@ x_test = np.zeros((len(imageTestingPath), imHeight, imWidth, 1))
 # load training images
 for i in range(len(x_train)):
     tempImg = Image.open(imageTrainingPath[i]).convert('L')
-    tempImg.thumbnail(updateImageSize, Image.LANCZOS)
+    tempImg = tempImg.resize(updateImageSize, Image.LANCZOS)
     x_train[i, :, :, 0] = np.array(tempImg, 'f')
     
 # load testing images
 for i in range(len(x_test)):
     tempImg = Image.open(imageTestingPath[i]).convert('L')
-    tempImg.thumbnail(updateImageSize, Image.LANCZOS)
+    tempImg = tempImg.resize(updateImageSize, Image.LANCZOS)
     x_test[i, :, :, 0] = np.array(tempImg, 'f')
 
 
@@ -121,8 +120,7 @@ model.add(MaxPooling2D((2,2)))
 ## Flatten infor and create my fully connected layer for finding out desired
 #probabilites
 model.add(Flatten())
-model.add(Dense(64, activation="relu"))
-model.add(Dense(10, activation="softmax"))
+model.add(Dense(4, activation="relu"))
 
 # Compile, fit and evaluate your CNN model.
 model.compile(optimizer="sgd", loss="categorical_crossentropy", metrics=["accuracy"])
